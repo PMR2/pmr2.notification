@@ -25,7 +25,7 @@ class ISettings(zope.interface.Interface):
     )
 
     subject_template = zope.schema.TextLine(
-        title=u'Workflow Notification Subject',
+        title=u'Workflow Notification Subject Template',
         description=u'Subject line for the workflow notification email.  A '
             'few tokens are available: \n'
             '{event} - The event object. '
