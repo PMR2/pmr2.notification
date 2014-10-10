@@ -1,0 +1,9 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="pmr2.notification.workflow">
+
+  <configure zcml:condition="installed pmr2.app">
+    <include file="subscriber.zcml" />
+  </configure>
+
+</configure>
