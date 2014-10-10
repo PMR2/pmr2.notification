@@ -5,7 +5,7 @@
 
   <genericsetup:registerProfile
       name="default"
-      title="pmr2.notification"
+      title="PMR2 Notification"
       directory="profiles/default"
       description="Notification support for certain events and registry settings related to this."
       provides="Products.GenericSetup.interfaces.EXTENSION"
