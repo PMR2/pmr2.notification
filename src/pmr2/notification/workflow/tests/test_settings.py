@@ -13,7 +13,7 @@ from plone.registry.interfaces import IRegistry
 from plone.app.testing import TEST_USER_ID, setRoles
 
 from pmr2.testing.base import TestRequest
-from pmr2.app.workspace.tests.layer import WORKSPACE_INTEGRATION_LAYER
+from pmr2.notification.testing.layer import NOTIFICATION_INTEGRATION_LAYER
 
 from pmr2.notification.workflow.interfaces import ISettings
 from pmr2.notification.workflow.browser import SettingsEditForm
@@ -21,19 +21,21 @@ from pmr2.notification.workflow.subscriber import workflow_email
 
 
 
-class SettingsTestCase(ptc.FunctionalTestCase):
+class SettingsTestCase(unittest.TestCase):
     """
     Test that the settings is set up correctly.
     """
 
-    def afterSetUp(self):
+    layer = NOTIFICATION_INTEGRATION_LAYER
+
+    def setUp(self):
         self.registry = zope.component.getUtility(IRegistry)
         self.settings = self.registry.forInterface(ISettings,
             prefix='pmr2.notification.workflow.settings')
 
     def test_basic_render_form(self):
         request = TestRequest()
-        form = SettingsEditForm(self.portal, request)
+        form = SettingsEditForm(self.layer['portal'], request)
         form.update()
         result = form.render()
         self.assertTrue(result)
@@ -42,9 +44,11 @@ class SettingsTestCase(ptc.FunctionalTestCase):
         request = TestRequest(form={
             'form.widgets.wf_change_recipient': 'user@example.com',
             'form.widgets.wf_send_email': 'selected',
+            'form.widgets.subject_template': 'subject',
+            'form.widgets.message_template': 'message',
             'form.buttons.apply': 1,
         })
-        form = SettingsEditForm(self.portal, request)
+        form = SettingsEditForm(self.layer['portal'], request)
         form.update()
         self.assertEqual(self.settings.wf_change_recipient, 'user@example.com')
         self.assertTrue(self.settings.wf_send_email)
@@ -53,7 +57,7 @@ class SettingsTestCase(ptc.FunctionalTestCase):
         self.settings.wf_change_recipient = u'tester@example.com'
 
         request = TestRequest()
-        form = SettingsEditForm(self.portal, request)
+        form = SettingsEditForm(self.layer['portal'], request)
         form.update()
         result = form.render()
         self.assertIn('tester@example.com', result)
@@ -64,7 +68,7 @@ class MailTestCase(unittest.TestCase):
     Test to see that emails are sent.
     """
 
-    layer = WORKSPACE_INTEGRATION_LAYER
+    layer = NOTIFICATION_INTEGRATION_LAYER
 
     def setUp(self):
         self.portal = self.layer['portal']
