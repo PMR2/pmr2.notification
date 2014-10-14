@@ -46,7 +46,11 @@ def workflow_email(obj, event):
     sender = portal.getProperty('email_from_address')
     recipient = settings.wf_change_recipient
 
-    if not event.transition.new_state_id in settings.wf_change_states:
+    try:
+        if not event.transition.new_state_id in settings.wf_change_states:
+            return
+    except AttributeError:
+        # event does not have the required attributes.
         return
 
     params = defaultdict(str, {
