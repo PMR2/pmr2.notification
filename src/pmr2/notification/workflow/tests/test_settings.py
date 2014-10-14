@@ -150,6 +150,16 @@ class MailTestCase(unittest.TestCase):
         pw.doActionFor(self.portal.workspace.test, "submit")
         self.assertEqual(len(self.mailhost.messages), 0)
 
+    def test_workflow_email_create_nofailure(self):
+        # There will be a case where object is created but no transition
+        # states will be available.  It should not fail.
+        self.settings.wf_change_states = [u'published']
+        from pmr2.app.workspace.content import Workspace
+        wks = Workspace('wf_mail_test')
+        self.portal.workspace['wf_mail_test'] = wks
+        wks.notifyWorkflowCreated()
+        self.assertEqual(len(self.mailhost.messages), 0)
+
 
 def test_suite():
     from unittest import TestSuite, makeSuite
