@@ -21,8 +21,8 @@ class NotificationLayer(PloneSandboxLayer):
 
     def setUpPloneSite(self, portal):
         """
-        Apply the default pmr2.app profile and ensure that the settings
-        have the tmpdir applied in.
+        Apply the default pmr2.notification profile and ensure that the
+        settings have the tmpdir applied in.
         """
 
         # install pmr2.notification
