@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.1.2 - (2020-12-03)
+--------------------
+
+- Forgot that ``title_or_id`` returns an encoded ``str``; reencode that
+  back into ``unicode`` to prevent automatic wrongful ascii conversion.
+
 0.1.1 - (2014-10-15)
 --------------------
 

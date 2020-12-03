@@ -57,11 +57,11 @@ def workflow_email(obj, event):
         'obj': obj,
         'event': event,
         'obj_url': obj.absolute_url(),
-        'title_or_id': obj.title_or_id(),
+        'title_or_id': obj.title_or_id().decode('utf8', 'replace'),
         'portal_url': portal.portal_url(),
     })
 
     subject = format(settings, 'subject_template', params)
     message = format(settings, 'message_template', params)
 
-    mail_host.send(message, recipient, sender, subject)
+    mail_host.send(message, recipient, sender, subject, charset='utf-8')
