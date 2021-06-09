@@ -1,5 +1,7 @@
 import unittest
 import warnings
+from email import message_from_string
+from email.header import decode_header
 
 import zope.component
 
@@ -100,11 +102,17 @@ class MailTestCase(unittest.TestCase):
         self.settings.wf_change_states = [u'pending']
         pw = getToolByName(self.portal, "portal_workflow")
         pw.doActionFor(self.portal.workspace.test, "submit")
-        msg = str(self.mailhost.messages[0])
-        self.assertTrue('Subject: Workspace `test` is now pending' in msg)
-        self.assertTrue('To: tester@example.com' in msg)
-        self.assertTrue('From: admin@example.com' in msg)
-        self.assertTrue('Visit http://nohost/plone/workspace/test' in msg)
+        msg = message_from_string(self.mailhost.messages[0])
+        self.assertEqual(
+            'Workspace `test` is now pending',
+            decode_header(msg.get('Subject'))[0][0]
+        )
+        self.assertEqual('tester@example.com', msg.get('To'))
+        self.assertEqual('admin@example.com', msg.get('From'))
+        self.assertEqual(
+            'Visit http://nohost/plone/workspace/test for more details.',
+            msg.get_payload()
+        )
 
     def test_workflow_email_custom_format_success(self):
         self.settings.wf_change_states = [u'published']
@@ -114,12 +122,14 @@ class MailTestCase(unittest.TestCase):
 
         pw = getToolByName(self.portal, "portal_workflow")
         pw.doActionFor(self.portal.workspace.cake, "publish")
-        msg = str(self.mailhost.messages[0])
-        self.assertTrue('Subject: Item: ()' in msg)
-        self.assertTrue('To: tester@example.com' in msg)
-        self.assertTrue('From: admin@example.com' in msg)
-        self.assertTrue('cake is now published at site <http://nohost/plone>.'
-            in msg)
+        msg = message_from_string(self.mailhost.messages[0])
+        self.assertEqual('Item: ()', decode_header(msg.get('Subject'))[0][0])
+        self.assertEqual('tester@example.com', msg.get('To'))
+        self.assertEqual('admin@example.com', msg.get('From'))
+        self.assertEqual(
+            'cake is now published at site <http://nohost/plone>.',
+            msg.get_payload()
+        )
 
     def test_workflow_email_custom_format_malformed(self):
         self.settings.wf_change_states = [u'published']
@@ -128,10 +138,16 @@ class MailTestCase(unittest.TestCase):
             u'{obj.not_attribute} is now {event.transition.new_state_id}'
         pw = getToolByName(self.portal, "portal_workflow")
         pw.doActionFor(self.portal.workspace.cake, "publish")
-        msg = str(self.mailhost.messages[0])
+        msg = message_from_string(self.mailhost.messages[0])
         # None of the message templates will be processed here.
-        self.assertTrue(self.settings.subject_template in msg)
-        self.assertTrue(self.settings.message_template in msg)
+        self.assertEqual(
+            'Item: not_exist}', decode_header(msg.get('Subject'))[0][0])
+        self.assertEqual('tester@example.com', msg.get('To'))
+        self.assertEqual('admin@example.com', msg.get('From'))
+        self.assertEqual(
+            '{obj.not_attribute} is now {event.transition.new_state_id}',
+            msg.get_payload(),
+        )
 
     def test_workflow_email_skipped_wf_state(self):
         self.settings.wf_change_states = [u'pending']
